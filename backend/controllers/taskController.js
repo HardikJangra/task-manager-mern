@@ -30,9 +30,25 @@ const createTask = async (req, res) => {
 };
 
 const getTasks = async (req, res) => {
-  res.json({
-    message: "Get Tasks API Working",
-  });
+  try {
+    const tasks = await Task.find({
+      userId: req.user.id,
+    }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      count: tasks.length,
+      tasks,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
 };
 
 const updateTask = async (req, res) => {
