@@ -7,6 +7,7 @@ import {
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import PrivateRoute from "./routes/PrivateRoute";
 
 function App() {
   return (
@@ -23,9 +24,13 @@ function App() {
         />
 
         <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+  path="/dashboard"
+  element={
+    <PrivateRoute>
+      <Dashboard />
+    </PrivateRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
