@@ -18,6 +18,28 @@ function Dashboard() {
       console.log(error);
     }
   };
+  const deleteTask = async (id) => {
+  try {
+    await api.delete(
+      `/tasks/${id}`
+    );
+
+    fetchTasks();
+  } catch (error) {
+    console.log(error);
+  }
+};
+const toggleTask = async (id) => {
+  try {
+    await api.patch(
+      `/tasks/${id}/toggle`
+    );
+
+    fetchTasks();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   useEffect(() => {
     fetchTasks();
@@ -29,7 +51,7 @@ function Dashboard() {
 
       <div className="max-w-5xl mx-auto p-6">
 
-        <TaskForm />
+        <TaskForm fetchTasks={fetchTasks} />
 
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">
@@ -41,9 +63,11 @@ function Dashboard() {
           ) : (
             tasks.map((task) => (
               <TaskCard
-                key={task._id}
-                task={task}
-              />
+  key={task._id}
+  task={task}
+  onDelete={deleteTask}
+  onToggle={toggleTask}
+/>
             ))
           )}
         </div>

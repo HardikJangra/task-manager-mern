@@ -1,6 +1,11 @@
-function TaskCard({ task }) {
+function TaskCard({
+  task,
+  onDelete,
+  onToggle,
+}) {
   return (
     <div className="bg-white p-5 rounded-lg shadow mb-4">
+
       <div className="flex justify-between items-start">
 
         <div>
@@ -26,6 +31,29 @@ function TaskCard({ task }) {
         </span>
 
       </div>
+
+      <div className="flex gap-3 mt-4">
+
+        <button
+          onClick={() =>
+            onToggle(task._id)
+          }
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Toggle Status
+        </button>
+
+        <button
+          onClick={() =>
+            onDelete(task._id)
+          }
+          className="bg-red-500 text-white px-4 py-2 rounded"
+        >
+          Delete
+        </button>
+
+      </div>
+
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 
-function TaskForm() {
+function TaskForm({ fetchTasks }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -10,10 +10,16 @@ function TaskForm() {
 
   try {
     await api.post("/tasks", {
-      title,
-      description,
-    });
+  title,
+  description,
+});
 
+await fetchTasks();
+
+setTitle("");
+setDescription("");
+
+alert("Task Created");
     alert("Task Created");
 
     setTitle("");
