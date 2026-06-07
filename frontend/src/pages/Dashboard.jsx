@@ -1,25 +1,24 @@
-import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import TaskForm from "../components/TaskForm";
 
 function Dashboard() {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
-
   return (
-    <div className="p-10">
-      <h1 className="text-3xl font-bold">
-        Dashboard
-      </h1>
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
 
-      <button
-        onClick={handleLogout}
-        className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-      >
-        Logout
-      </button>
+      <div className="max-w-5xl mx-auto p-6">
+
+        <TaskForm />
+
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">
+            My Tasks
+          </h2>
+
+          <p>No tasks available</p>
+        </div>
+
+      </div>
     </div>
   );
 }
