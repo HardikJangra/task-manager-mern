@@ -1,21 +1,29 @@
 import { useState } from "react";
+import api from "../services/api";
 
 function TaskForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    console.log({
+  try {
+    await api.post("/tasks", {
       title,
       description,
     });
 
+    alert("Task Created");
+
     setTitle("");
     setDescription("");
-  };
+  } catch (error) {
+    console.log(error);
 
+    alert("Task Creation Failed");
+  }
+};
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h2 className="text-xl font-bold mb-4">
