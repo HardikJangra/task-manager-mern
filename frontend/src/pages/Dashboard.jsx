@@ -6,40 +6,34 @@ import TaskCard from "../components/TaskCard";
 
 function Dashboard() {
   const [tasks, setTasks] = useState([]);
+  const [editingTask, setEditingTask] = useState(null);
 
   const fetchTasks = async () => {
     try {
-      const res = await api.get(
-        "/tasks"
-      );
-
+      const res = await api.get("/tasks");
       setTasks(res.data.tasks);
     } catch (error) {
       console.log(error);
     }
   };
+
   const deleteTask = async (id) => {
-  try {
-    await api.delete(
-      `/tasks/${id}`
-    );
+    try {
+      await api.delete(`/tasks/${id}`);
+      fetchTasks();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    fetchTasks();
-  } catch (error) {
-    console.log(error);
-  }
-};
-const toggleTask = async (id) => {
-  try {
-    await api.patch(
-      `/tasks/${id}/toggle`
-    );
-
-    fetchTasks();
-  } catch (error) {
-    console.log(error);
-  }
-};
+  const toggleTask = async (id) => {
+    try {
+      await api.patch(`/tasks/${id}/toggle`);
+      fetchTasks();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     fetchTasks();
@@ -50,8 +44,11 @@ const toggleTask = async (id) => {
       <Navbar />
 
       <div className="max-w-5xl mx-auto p-6">
-
-        <TaskForm fetchTasks={fetchTasks} />
+        <TaskForm
+          fetchTasks={fetchTasks}
+          editingTask={editingTask}
+          setEditingTask={setEditingTask}
+        />
 
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">
@@ -63,15 +60,15 @@ const toggleTask = async (id) => {
           ) : (
             tasks.map((task) => (
               <TaskCard
-  key={task._id}
-  task={task}
-  onDelete={deleteTask}
-  onToggle={toggleTask}
-/>
+                key={task._id}
+                task={task}
+                onDelete={deleteTask}
+                onToggle={toggleTask}
+                onEdit={setEditingTask}
+              />
             ))
           )}
         </div>
-
       </div>
     </div>
   );

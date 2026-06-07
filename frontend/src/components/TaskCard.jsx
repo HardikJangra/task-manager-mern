@@ -2,12 +2,11 @@ function TaskCard({
   task,
   onDelete,
   onToggle,
+  onEdit,
 }) {
   return (
     <div className="bg-white p-5 rounded-lg shadow mb-4">
-
       <div className="flex justify-between items-start">
-
         <div>
           <h3 className="text-xl font-semibold">
             {task.title}
@@ -29,10 +28,15 @@ function TaskCard({
             ? "Completed"
             : "Pending"}
         </span>
-
       </div>
 
       <div className="flex gap-3 mt-4">
+        <button
+          onClick={() => onEdit(task)}
+          className="bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Edit
+        </button>
 
         <button
           onClick={() =>
@@ -51,9 +55,7 @@ function TaskCard({
         >
           Delete
         </button>
-
       </div>
-
     </div>
   );
 }
