@@ -2,6 +2,7 @@ import {
   useState,
   useEffect,
 } from "react";
+import toast from "react-hot-toast";
 
 import api from "../services/api";
 
@@ -16,17 +17,24 @@ function TaskForm({
   const [description, setDescription] =
     useState("");
 
+  const [loading, setLoading] =
+    useState(false);
+
   useEffect(() => {
     if (editingTask) {
       setTitle(editingTask.title);
       setDescription(
         editingTask.description
       );
+    } else {
+      setTitle("");
+      setDescription("");
     }
   }, [editingTask]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       if (editingTask) {
@@ -38,8 +46,7 @@ function TaskForm({
           }
         );
 
-        alert("Task Updated");
-
+        toast.success("Task updated");
         setEditingTask(null);
       } else {
         await api.post("/tasks", {
@@ -47,16 +54,20 @@ function TaskForm({
           description,
         });
 
-        alert("Task Created");
+        toast.success("Task created");
       }
 
       await fetchTasks();
-
       setTitle("");
       setDescription("");
     } catch (error) {
-      console.log(error);
-      alert("Operation Failed");
+      console.error(error);
+      toast.error(
+        error.response?.data?.message ||
+          "Operation failed"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,6 +91,7 @@ function TaskForm({
             setTitle(e.target.value)
           }
           className="w-full border p-3 rounded"
+          disabled={loading}
         />
 
         <textarea
@@ -91,14 +103,20 @@ function TaskForm({
             )
           }
           className="w-full border p-3 rounded"
+          disabled={loading}
         />
 
         <button
           type="submit"
-          className="bg-black text-white px-6 py-3 rounded"
+          disabled={loading}
+          className="bg-black text-white px-6 py-3 rounded disabled:opacity-70"
         >
           {editingTask
-            ? "Update Task"
+            ? loading
+              ? "Updating..."
+              : "Update Task"
+            : loading
+            ? "Creating..."
             : "Add Task"}
         </button>
       </form>

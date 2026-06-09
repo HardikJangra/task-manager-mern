@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import api from "../services/api";
 
 function Register() {
@@ -31,13 +32,10 @@ function Register() {
         formData
       );
 
-      alert(
-        "Registration Successful"
-      );
-
+      toast.success("Registration successful");
       navigate("/");
     } catch (error) {
-      alert(
+      toast.error(
         error.response?.data?.message ||
           "Registration Failed"
       );
@@ -88,10 +86,10 @@ function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white p-3 rounded"
+            className="w-full bg-black text-white p-3 rounded disabled:opacity-70"
           >
             {loading
-              ? "Creating Account..."
+              ? "Registering..."
               : "Register"}
           </button>
         </form>
