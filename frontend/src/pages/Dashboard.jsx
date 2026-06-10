@@ -10,6 +10,8 @@ function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [loadingTaskId, setLoadingTaskId] = useState(null);
   const [taskAction, setTaskAction] = useState("");
   const [fetchingTasks, setFetchingTasks] = useState(false);
@@ -82,19 +84,38 @@ function Dashboard() {
     fetchTasks();
   }, []);
 
-  const filteredTasks = tasks.filter((task) => {
-    const query = searchTerm.toLowerCase();
-    return (
-      task.title.toLowerCase().includes(query) ||
-      task.description.toLowerCase().includes(query)
-    );
-  });
+  const filteredTasks = tasks
+    .filter((task) => {
+      if (activeFilter === "completed") return task.completed;
+      if (activeFilter === "pending") return !task.completed;
+      return true;
+    })
+    .filter((task) => {
+      const query = searchTerm.toLowerCase();
+      return (
+        task.title.toLowerCase().includes(query) ||
+        task.description.toLowerCase().includes(query)
+      );
+    });
 
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(
     (task) => task.completed
   ).length;
   const pendingTasks = totalTasks - completedTasks;
+
+  // Pagination
+  const PAGE_SIZE = 5;
+  const totalPages = Math.max(1, Math.ceil(filteredTasks.length / PAGE_SIZE));
+  useEffect(() => {
+    // reset to first page when search or filter changes
+    setCurrentPage(1);
+  }, [searchTerm, activeFilter]);
+
+  const paginatedTasks = filteredTasks.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -146,6 +167,41 @@ function Dashboard() {
               </div>
             </div>
 
+              <div className="mt-4 flex items-center gap-3">
+                <button
+                  onClick={() => setActiveFilter("all")}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none ${
+                    activeFilter === "all"
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-50 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  All
+                </button>
+
+                <button
+                  onClick={() => setActiveFilter("completed")}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none ${
+                    activeFilter === "completed"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-50 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  Completed
+                </button>
+
+                <button
+                  onClick={() => setActiveFilter("pending")}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none ${
+                    activeFilter === "pending"
+                      ? "bg-amber-500 text-white"
+                      : "bg-slate-50 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  Pending
+                </button>
+              </div>
+
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                 <p className="text-sm text-slate-500">Total Tasks</p>
@@ -184,23 +240,70 @@ function Dashboard() {
               </div>
             ) : filteredTasks.length === 0 ? (
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-slate-700">
-                <p className="text-lg font-semibold">No matching tasks.</p>
-                <p className="mt-2 text-sm text-slate-600">Try a different search term.</p>
+                {searchTerm.trim() !== "" ? (
+                  <>
+                    <p className="text-lg font-semibold">🔍 No matching tasks found.</p>
+                    <p className="mt-2 text-sm text-slate-600">Try another search.</p>
+                  </>
+                ) : activeFilter === "completed" ? (
+                  <>
+                    <p className="text-lg font-semibold">✅ No completed tasks yet.</p>
+                    <p className="mt-2 text-sm text-slate-600">Complete a task to see it here.</p>
+                  </>
+                ) : activeFilter === "pending" ? (
+                  <>
+                    <p className="text-lg font-semibold">📋 No pending tasks.</p>
+                    <p className="mt-2 text-sm text-slate-600">You're all caught up!</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-semibold">No matching tasks found.</p>
+                    <p className="mt-2 text-sm text-slate-600">Try another search or clear filters.</p>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="grid gap-4">
-                {filteredTasks.map((task) => (
-                  <TaskCard
-                    key={task._id}
-                    task={task}
-                    onDelete={deleteTask}
-                    onToggle={toggleTask}
-                    onEdit={setEditingTask}
-                    isLoading={loadingTaskId === task._id}
-                    loadingAction={taskAction}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid gap-4">
+                  {paginatedTasks.map((task) => (
+                    <TaskCard
+                      key={task._id}
+                      task={task}
+                      onDelete={deleteTask}
+                      onToggle={toggleTask}
+                      onEdit={setEditingTask}
+                      isLoading={loadingTaskId === task._id}
+                      loadingAction={taskAction}
+                    />
+                  ))}
+                </div>
+
+                {filteredTasks.length > PAGE_SIZE && (
+                  <div className="mt-6 flex items-center justify-between">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      aria-label="Previous page"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+
+                    <div className="text-sm text-slate-600">
+                      Page {currentPage} of {totalPages}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      aria-label="Next page"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
